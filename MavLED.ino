@@ -63,6 +63,34 @@
 /* **************************************************************************** */
 
 // ----------------------------------------------------------------------------
+// Includes
+// ----------------------------------------------------------------------------
+#include <FastSerial.h>       // Fast serial library
+#include <SoftwareSerial.h>
+#include "FastLED.h"          // Library to drive RGB Leds
+#include <EEPROM.h>
+#include <GCS_MAVLink.h>
+#include <AP_Common.h>
+#include <AP_Math.h>
+#include <math.h>
+#include <inttypes.h>
+#include <avr/pgmspace.h>
+#include <SimpleTimer.h>
+
+// Configurations
+//#include "IOBoard.h"
+//#include "IOEEPROM.h"
+
+// Get the common arduino functions
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "Arduino.h"
+#else
+	#include "wiring.h"
+#endif
+
+
+
+// ----------------------------------------------------------------------------
 // Defines
 // ----------------------------------------------------------------------------
 
@@ -75,48 +103,15 @@
 // RGB Led array
 #define CHIPSET LPD8806
 #define LED_ORDER BRG
-#define DATA_PIN 9
-#define CLOCK_PIN 8
+#define DATA_PIN 6
+#define CLOCK_PIN 13
 #define BACKGROUND Brown
 #define FOREGROUND Red
 #define NUM_LEDS 8
 
-// ----------------------------------------------------------------------------
-// Includes
-// ----------------------------------------------------------------------------
-
-#include "FastLED.h"          // Library to drive RGB Leds
-#include <FastSerial.h>       // Fast serial library
-#include <AP_Common.h>
-#include <AP_Math.h>
-#include <math.h>
-#include <inttypes.h>
-#include <avr/pgmspace.h>
-#include <EEPROM.h>
-#include <SimpleTimer.h>
-#include <GCS_MAVLink.h>
-#include <SoftwareSerial.h>
-
 #ifdef membug
 #include <MemoryFree.h>
 #endif
-
-
-// Configurations
-#include "IOBoard.h"
-#include "IOEEPROM.h"
-
-
-// Get the common arduino functions
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
-#else
-	#include "wiring.h"
-#endif
-
-
-
-
 
 // ----------------------------------------------------------------------------
 // Global Variables
