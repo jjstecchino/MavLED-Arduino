@@ -1,3 +1,7 @@
+// Supported RGB Led chipsets
+
+
+
 // Defined Patterns
 #define NONE   0
 #define CYLON  1
