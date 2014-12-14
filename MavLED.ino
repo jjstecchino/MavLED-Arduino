@@ -65,17 +65,20 @@
 // ----------------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------------
+// AVR Includes
 #include <FastSerial.h>       // Fast serial library
-#include <SoftwareSerial.h>
-#include "FastLED.h"          // Library to drive RGB Leds
-#include <EEPROM.h>
-#include <GCS_MAVLink.h>
+#include <SoftwareSerial.h>   // Software serial to allow serial comm through any digital pins
+#include <EEPROM.h>           // Read/Write AVR EEPROM
 #include <AP_Common.h>
 #include <AP_Math.h>
 #include <math.h>
 #include <inttypes.h>
 #include <avr/pgmspace.h>
-#include <SimpleTimer.h>
+// 
+#include "FastLED.h"          // Library to drive RGB Leds
+#define MAVLINK10             // Support only mavlink 1.0
+#include <GCS_MAVLink.h>      // Mavlink messaging
+#include <SimpleTimer.h>      // Simple timer
 
 // Configurations
 #include "MavLED_Pattern.h"  // LED strips configuration and pre-defined patterns
@@ -94,6 +97,7 @@
 // ----------------------------------------------------------------------------
 // Defines
 // ----------------------------------------------------------------------------
+#define HEARTBEAT      // HeartBeat signal
 #define CHKVER 40      // EEPROM checknum
 #define SER_TX 10      // Pin for serial Tx
 #define SER_RX 11      // Pin for serial Rx
@@ -117,6 +121,9 @@
 #define PROGMEM __attribute__(( section(".progmem.data") )) 
 #undef PSTR 
 #define PSTR(s) (__extension__({static prog_char __c[] PROGMEM = (s); &__c[0];}))
+
+#define hiWord(w) ((w) >> 8)
+#define loWord(w) ((w) & 0xff)
 
 #ifdef membug
 #include <MemoryFree.h>

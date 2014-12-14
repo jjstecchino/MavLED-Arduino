@@ -1,10 +1,3 @@
-/* 
-
-   EEPROM Functions for jD-IOBoard.
-
-
-*/
-
 // EEPROM reader/writers
 // Utilities for writing and reading from the EEPROM
 byte readEEPROM(int address) {
