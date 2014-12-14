@@ -78,6 +78,7 @@
 #include <SimpleTimer.h>
 
 // Configurations
+#include "MavLED_Pattern.h"  // LED strips configuration and pre-defined patterns
 //#include "IOBoard.h"
 //#include "IOEEPROM.h"
 
@@ -100,22 +101,6 @@
 #undef PSTR 
 #define PSTR(s) (__extension__({static prog_char __c[] PROGMEM = (s); &__c[0];}))
 
-// RGB Led array
-#define CHIPSET LPD8806
-#define LED_ORDER BRG
-#define LF_DPIN 2
-#define LF_CPIN 3
-#define RF_DPIN 4
-#define RF_CPIN 5
-#define LB_DPIN 6
-#define LB_CPIN 7
-#define RB_DPIN 8
-#define RB_CPIN 9
-#define BACKGROUND Blue
-#define FOREGROUND Red
-#define NUM_LEDS 8
-#define NUM_ARMS 4
-
 #ifdef membug
 #include <MemoryFree.h>
 #endif
@@ -135,12 +120,7 @@ void setup() {
   FastLED.addLeds<CHIPSET, RF_DPIN, RF_CPIN, LED_ORDER>(leds[1], NUM_LEDS);
   FastLED.addLeds<CHIPSET, LB_DPIN, LB_CPIN, LED_ORDER>(leds[2], NUM_LEDS);
   FastLED.addLeds<CHIPSET, RB_DPIN, RB_CPIN, LED_ORDER>(leds[3], NUM_LEDS);
-
-  for(int i = 0; i < NUM_ARMS; i++) {
-    for(int j = 0; j < NUM_LEDS; j++) {
-      leds[i][j] = CRGB::BACKGROUND;
-    }
-  }
+  showPattern(NONE);
 }
 
 // ----------------------------------------------------------------------------
@@ -148,37 +128,7 @@ void setup() {
 // ----------------------------------------------------------------------------
 
 void loop() { 
-  // First slide the led in one direction
-  for(int i = 0; i < NUM_LEDS; i++) {
-    // Set the i'th led to red 
-    for(int j = 0; j < NUM_ARMS; j++) {
-      leds[j][i] = CRGB::FOREGROUND;
-    }
-    // Show the leds
-    FastLED.show();
-    // now that we've shown the leds, reset the i'th led to black
-    for(int j = 0; j < NUM_ARMS; j++) {
-      leds[j][i] = CRGB::BACKGROUND;
-    }
-    // Wait a little bit before we loop around and do it again
-    delay(30);
-  }
-
-  // Now go in the other direction.  
-  for(int i = NUM_LEDS-1; i >= 0; i--) {
-    // Set the i'th led to red 
-    for(int j = 0; j < NUM_ARMS; j++) {
-      leds[j][i] = CRGB::FOREGROUND;
-    }
-    // Show the leds
-    FastLED.show();
-    // now that we've shown the leds, reset the i'th led to black
-    for(int j = 0; j < NUM_ARMS; j++) {
-      leds[j][i] = CRGB::BACKGROUND;
-    }
-    // Wait a little bit before we loop around and do it again
-    delay(30);
-  } 
+  showPattern(PULSE); 
 }
 
 
