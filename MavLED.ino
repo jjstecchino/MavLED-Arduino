@@ -25,41 +25,41 @@
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <http://www.gnu.org/licenses/>
  
-*/
- 
+ */
+
 /*
 //////////////////////////////////////////////////////////////////////////
-//  Description: 
-// 
-//  This is an Arduino sketch to drive 4 arrays of RGB LEDs, using an
-//  Arduino Pro Mini. The software listens to MAVLink messages and 
-//  canges patterns accordingly.
-//  Supports:  LPD8806 based RGB LED Arrays
-//
-//  If you use, redistribute this please mention original source.
-//
-//  Arduino Pro Mini pinouts and connections:
-//
-//                         G R  
-//         D D D D D D D D N S R T
-//         9 8 7 6 5 4 3 2 D T X X
-//         | | | | | | | | | | | |
-//      +----------------------------+
-//      |O O O O O O O O O O O O O   |
-//  V - |O                          O| _ GRN 
-//  G - |O           A A            O| - RX  F
-//      |            4 5            O| - TX  T
-// A7 - |O           | |            O| - VCC D
-// A6 - |O           O O            O| _ GND I
-//      |O O O O O O O O   O O O O  O| - BLK
-//      +----------------------------+
-//       | | | | | | | |   | | | |
-//       D D D D A A A A   V R G R
-//       1 1 1 1 0 1 2 3   C S N A
-//       0 1 2 3           C T D W
-//
-// More information, check 
-//
+ //  Description: 
+ // 
+ //  This is an Arduino sketch to drive 4 arrays of RGB LEDs, using an
+ //  Arduino Pro Mini. The software listens to MAVLink messages and 
+ //  canges patterns accordingly.
+ //  Supports:  LPD8806 based RGB LED Arrays
+ //
+ //  If you use, redistribute this please mention original source.
+ //
+ //  Arduino Pro Mini pinouts and connections:
+ //
+ //                         G R  
+ //         D D D D D D D D N S R T
+ //         9 8 7 6 5 4 3 2 D T X X
+ //         | | | | | | | | | | | |
+ //      +----------------------------+
+ //      |O O O O O O O O O O O O O   |
+ //  V - |O                          O| _ GRN 
+ //  G - |O           A A            O| - RX  F
+ //      |            4 5            O| - TX  T
+ // A7 - |O           | |            O| - VCC D
+ // A6 - |O           O O            O| _ GND I
+ //      |O O O O O O O O   O O O O  O| - BLK
+ //      +----------------------------+
+ //       | | | | | | | |   | | | |
+ //       D D D D A A A A   V R G R
+ //       1 1 1 1 0 1 2 3   C S N A
+ //       0 1 2 3           C T D W
+ //
+ // More information, check 
+ //
 /* **************************************************************************** */
 
 // ----------------------------------------------------------------------------
@@ -83,9 +83,9 @@
 
 // Get the common arduino functions
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
+#include "Arduino.h"
 #else
-	#include "wiring.h"
+#include "wiring.h"
 #endif
 
 
@@ -103,11 +103,18 @@
 // RGB Led array
 #define CHIPSET LPD8806
 #define LED_ORDER BRG
-#define DATA_PIN 6
-#define CLOCK_PIN 13
-#define BACKGROUND Brown
+#define LF_DPIN 2
+#define LF_CPIN 3
+#define RF_DPIN 4
+#define RF_CPIN 5
+#define LB_DPIN 6
+#define LB_CPIN 7
+#define RB_DPIN 8
+#define RB_CPIN 9
+#define BACKGROUND Blue
 #define FOREGROUND Red
 #define NUM_LEDS 8
+#define NUM_ARMS 4
 
 #ifdef membug
 #include <MemoryFree.h>
@@ -117,48 +124,63 @@
 // Global Variables
 // ----------------------------------------------------------------------------
 
-CRGB leds[NUM_LEDS];  // Define the array of leds
+CRGB leds[NUM_ARMS][NUM_LEDS];  // Define the array of leds
 
 // ----------------------------------------------------------------------------
 // Setup
 // ----------------------------------------------------------------------------
 
 void setup() { 
-	FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, LED_ORDER>(leds, NUM_LEDS);
-        for(int i = 0; i < NUM_LEDS; i++) {
-          leds[i] = CRGB::BACKGROUND;
-        }
- }
+  FastLED.addLeds<CHIPSET, LF_DPIN, LF_CPIN, LED_ORDER>(leds[0], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, RF_DPIN, RF_CPIN, LED_ORDER>(leds[1], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LB_DPIN, LB_CPIN, LED_ORDER>(leds[2], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, RB_DPIN, RB_CPIN, LED_ORDER>(leds[3], NUM_LEDS);
+
+  for(int i = 0; i < NUM_ARMS; i++) {
+    for(int j = 0; j < NUM_LEDS; j++) {
+      leds[i][j] = CRGB::BACKGROUND;
+    }
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Main Loop
 // ----------------------------------------------------------------------------
 
 void loop() { 
-	// First slide the led in one direction
-	for(int i = 0; i < NUM_LEDS; i++) {
-		// Set the i'th led to red 
-		leds[i] = CRGB::FOREGROUND;
-		// Show the leds
-		FastLED.show();
-		// now that we've shown the leds, reset the i'th led to black
-		leds[i] = CRGB::BACKGROUND;
-		// Wait a little bit before we loop around and do it again
-		delay(30);
-	}
+  // First slide the led in one direction
+  for(int i = 0; i < NUM_LEDS; i++) {
+    // Set the i'th led to red 
+    for(int j = 0; j < NUM_ARMS; j++) {
+      leds[j][i] = CRGB::FOREGROUND;
+    }
+    // Show the leds
+    FastLED.show();
+    // now that we've shown the leds, reset the i'th led to black
+    for(int j = 0; j < NUM_ARMS; j++) {
+      leds[j][i] = CRGB::BACKGROUND;
+    }
+    // Wait a little bit before we loop around and do it again
+    delay(30);
+  }
 
-	// Now go in the other direction.  
-	for(int i = NUM_LEDS-1; i >= 0; i--) {
-		// Set the i'th led to red 
-		leds[i] = CRGB::FOREGROUND;
-		// Show the leds
-		FastLED.show();
-		// now that we've shown the leds, reset the i'th led to black
-		leds[i] = CRGB::BACKGROUND;
-		// Wait a little bit before we loop around and do it again
-		delay(30);
-	} 
+  // Now go in the other direction.  
+  for(int i = NUM_LEDS-1; i >= 0; i--) {
+    // Set the i'th led to red 
+    for(int j = 0; j < NUM_ARMS; j++) {
+      leds[j][i] = CRGB::FOREGROUND;
+    }
+    // Show the leds
+    FastLED.show();
+    // now that we've shown the leds, reset the i'th led to black
+    for(int j = 0; j < NUM_ARMS; j++) {
+      leds[j][i] = CRGB::BACKGROUND;
+    }
+    // Wait a little bit before we loop around and do it again
+    delay(30);
+  } 
 }
+
 
 
 
