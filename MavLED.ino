@@ -7,7 +7,7 @@
  
  Program  : MavLED
  Version  : V 0.01 Dec 14, 2014
- Author   : Claudio Guareschi
+ Author   : jjstecchino
  
  Based on IO-Board by Jani Hirvinen, Sandro Beningo (MAVLink routines), 
  Mike Smith (BetterStream and Fast Serial libraries), FastLED library
@@ -40,27 +40,55 @@
 //
 //  Arduino Pro Mini pinouts and connections:
 //
-//             S M M G       R T R
-//         5 5 C O I N D D D X X S
-//         V V K S S D 7 6 5 1 1 T
+//                         G R  
+//         D D D D D D D D N S R T
+//         9 8 7 6 5 4 3 2 D T X X
 //         | | | | | | | | | | | |
 //      +----------------------------+
 //      |O O O O O O O O O O O O O   |
-// O1 - |O O   | | |                O| _ DTS 
-// O2 - |O O   3 2 1                O| - RX  F
-// O3 - |O O   1 1 1                O| - TX  T
-// O4 - |O O   D D D                O| - 5V  D
-// O5 - |O O                        O| _ CTS I
-// O6 - |O O O O O O O O   O O O O  O| - GND
+//  V - |O                          O| _ GRN 
+//  G - |O           A A            O| - RX  F
+//      |            4 5            O| - TX  T
+// A7 - |O           | |            O| - VCC D
+// A6 - |O           O O            O| _ GND I
+//      |O O O O O O O O   O O O O  O| - BLK
 //      +----------------------------+
-//       |   | | | | | |   | | | |
-//       C   G 5 A A A A   S S 5 G
-//       O   N V 0 1 2 3   D C V N
-//       M   D             A L   D
+//       | | | | | | | |   | | | |
+//       D D D D A A A A   V R G R
+//       1 1 1 1 0 1 2 3   C S N A
+//       0 1 2 3           C T D W
 //
 // More information, check 
 //
 /* **************************************************************************** */
+
+// ----------------------------------------------------------------------------
+// Includes
+// ----------------------------------------------------------------------------
+#include <FastSerial.h>       // Fast serial library
+#include <SoftwareSerial.h>
+#include "FastLED.h"          // Library to drive RGB Leds
+#include <EEPROM.h>
+#include <GCS_MAVLink.h>
+#include <AP_Common.h>
+#include <AP_Math.h>
+#include <math.h>
+#include <inttypes.h>
+#include <avr/pgmspace.h>
+#include <SimpleTimer.h>
+
+// Configurations
+//#include "IOBoard.h"
+//#include "IOEEPROM.h"
+
+// Get the common arduino functions
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "Arduino.h"
+#else
+	#include "wiring.h"
+#endif
+
+
 
 // ----------------------------------------------------------------------------
 // Defines
@@ -75,48 +103,15 @@
 // RGB Led array
 #define CHIPSET LPD8806
 #define LED_ORDER BRG
-#define DATA_PIN 9
-#define CLOCK_PIN 8
+#define DATA_PIN 6
+#define CLOCK_PIN 13
 #define BACKGROUND Brown
 #define FOREGROUND Red
 #define NUM_LEDS 8
 
-// ----------------------------------------------------------------------------
-// Includes
-// ----------------------------------------------------------------------------
-
-#include "FastLED.h"          // Library to drive RGB Leds
-#include <FastSerial.h>       // Fast serial library
-#include <AP_Common.h>
-#include <AP_Math.h>
-#include <math.h>
-#include <inttypes.h>
-#include <avr/pgmspace.h>
-#include <EEPROM.h>
-#include <SimpleTimer.h>
-#include <GCS_MAVLink.h>
-#include <SoftwareSerial.h>
-
 #ifdef membug
 #include <MemoryFree.h>
 #endif
-
-
-// Configurations
-#include "IOBoard.h"
-#include "IOEEPROM.h"
-
-
-// Get the common arduino functions
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
-#else
-	#include "wiring.h"
-#endif
-
-
-
-
 
 // ----------------------------------------------------------------------------
 // Global Variables
